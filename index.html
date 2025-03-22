@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il tuo Saldo - Aura+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #E30AF5, #F174FF);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 600;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        header p {
+            font-size: 1.2em;
+            font-weight: 300;
+            margin-bottom: 30px;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        .saldo-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: 600;
+            animation: fadeIn 1.2s ease-in-out;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Il tuo saldo</h1>
+            <p>Visualizza i tuoi A+ Coins disponibili.</p>
+        </header>
+        
+        <div class="saldo-box" id="saldo">Caricamento...</div>
+    </div>
+
+    <script>
+        // Configurazione Firebase
+        const firebaseConfig = {
+           apiKey: "AIzaSyDsrHAtIh5bsYDHa1wz0LMcmciChAoRikU",
+  authDomain: "myauraid-f03c6.firebaseapp.com",
+  projectId: "myauraid-f03c6",
+  storageBucket: "myauraid-f03c6.firebasestorage.app",
+  messagingSenderId: "190478237725",
+  appId: "1:190478237725:web:0d39907473f511b85a06f4"
+        };
+
+        // Inizializza Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Funzione per ottenere il saldo
+        function caricaSaldo() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    const uid = user.uid;
+                    db.collection("utenti").doc(uid).get().then(doc => {
+                        if (doc.exists) {
+                            const saldo = doc.data().saldo;
+                            document.getElementById("saldo").innerText = saldo + " A+ Coins";
+                        } else {
+                            document.getElementById("saldo").innerText = "Saldo non trovato";
+                        }
+                    }).catch(error => {
+                        document.getElementById("saldo").innerText = "Errore nel caricamento";
+                        console.error("Errore:", error);
+                    });
+                } else {
+                    document.getElementById("saldo").innerText = "Accedi per vedere il saldo";
+                }
+            });
+        }
+
+        // Chiama la funzione
+        caricaSaldo();
+    </script>
+
+</body>
+</html>
