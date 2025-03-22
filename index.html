@@ -3,112 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il tuo Saldo - Aura+</title>
+    <title>Saldo Utente</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDsrHAtIh5bsYDHa1wz0LMcmciChAoRikU",
+            authDomain: "myauraid-f03c6.firebaseapp.com",
+            projectId: "myauraid-f03c6",
+            storageBucket: "myauraid-f03c6.firebasestorage.app",
+            messagingSenderId: "190478237725",
+            appId: "1:190478237725:web:0d39907473f511b85a06f4"
+        };
 
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+    <style>
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #E30AF5, #F174FF);
-            color: #fff;
-            text-align: center;
-            padding: 20px;
+            font-family: Poppins, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
 
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 600;
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        header p {
-            font-size: 1.2em;
-            font-weight: 300;
-            margin-bottom: 30px;
-            animation: fadeIn 1.2s ease-in-out;
-        }
-
-        .saldo-box {
-            background: rgba(255, 255, 255, 0.2);
+            background-color: white;
             padding: 20px;
-            border-radius: 15px;
-            font-size: 1.5em;
-            font-weight: 600;
-            animation: fadeIn 1.2s ease-in-out;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .saldo {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .btn-settings {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f174ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .btn-settings:hover {
+            background-color: #e008f6;
+        }
+
+        #profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>
-            <h1>Il tuo saldo</h1>
-            <p>Visualizza i tuoi A+ Coins disponibili.</p>
-        </header>
+        <img id="profile-img" src="default-profile.png" alt="Immagine del profilo">
+        <h2>Saldo</h2>
+        <p>Saldo: <span id="saldo" class="saldo">Caricamento...</span></p>
+        <p id="badge"></p> <!-- Sezione per il badge -->
+        <p id="error-message" class="error"></p>
         
-        <div class="saldo-box" id="saldo">Caricamento...</div>
+        <!-- Bottone Impostazioni -->
+        <button class="btn-settings" onclick="window.location.href='settings.html'">Impostazioni</button>
+        <button class="btn-settings" onclick="window.location.href='howtogetbalance.html'">Cosa puoi fare con il saldo</button>
+        <button class="btn-settings" onclick="window.location.href='index.html'">Torna al menù opzioni</button>
     </div>
 
     <script>
-        // Configurazione Firebase
-        const firebaseConfig = {
-           apiKey: "AIzaSyDsrHAtIh5bsYDHa1wz0LMcmciChAoRikU",
-  authDomain: "myauraid-f03c6.firebaseapp.com",
-  projectId: "myauraid-f03c6",
-  storageBucket: "myauraid-f03c6.firebasestorage.app",
-  messagingSenderId: "190478237725",
-  appId: "1:190478237725:web:0d39907473f511b85a06f4"
-        };
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                document.getElementById('user-email').textContent = "Email: " + user.email;
+                document.getElementById('user-uid').textContent = "UID: " + user.uid;
 
-        // Inizializza Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Funzione per ottenere il saldo
-        function caricaSaldo() {
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    const uid = user.uid;
-                    db.collection("utenti").doc(uid).get().then(doc => {
+                // Recupero saldo da Firestore
+                db.collection("users").doc(user.uid).get()
+                    .then((doc) => {
                         if (doc.exists) {
-                            const saldo = doc.data().saldo;
-                            document.getElementById("saldo").innerText = saldo + " A+ Coins";
-                        } else {
-                            document.getElementById("saldo").innerText = "Saldo non trovato";
-                        }
-                    }).catch(error => {
-                        document.getElementById("saldo").innerText = "Errore nel caricamento";
-                        console.error("Errore:", error);
-                    });
-                } else {
-                    document.getElementById("saldo").innerText = "Accedi per vedere il saldo";
-                }
-            });
-        }
+                            const userData = doc.data();
+                            if (userData.saldo !== undefined) {
+                                document.getElementById('saldo').textContent = userData.saldo + "€";
+                            } else {
+                                document.getElementById('saldo').textContent = "0€";
+                            }
 
-        // Chiama la funzione
-        caricaSaldo();
+                            // Carica immagine profilo
+                            const profileImageURL = userData.profileImage || 'aurastudio.png'; // Se non c'è immagine, usa quella di default
+                            document.getElementById('profile-img').src = profileImageURL;
+
+                            // Carica e mostra il badge basato sul campo 'admin'
+                            const badge = userData.admin === true ? 'Admin' : 'Utente'; // Se il campo 'admin' è true, mostra "Admin"
+                            document.getElementById('badge').textContent = "Badge: " + badge;
+                            document.getElementById('badge').classList.add('badge');
+                        } else {
+                            document.getElementById('saldo').textContent = "0€";
+                            console.log("Nessun documento trovato per l'utente, creando uno nuovo...");
+                            
+                            // Creazione automatica del documento utente se non esiste
+                            db.collection("users").doc(user.uid).set({
+                                saldo: 0,
+                                profileImage: 'aurastudio.png', // Immagine profilo di default
+                                admin: false // Imposta 'admin' su false di default
+                            }).then(() => {
+                                console.log("Documento utente creato con saldo 0.");
+                            }).catch((error) => {
+                                document.getElementById('error-message').textContent = "Errore nel salvataggio dei dati.";
+                                console.error("Errore nella creazione del documento:", error);
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Errore nel recupero dati:", error);
+                        document.getElementById('error-message').textContent = "Errore nel caricamento del saldo.";
+                    });
+            } else {
+                window.location.href = "login.html";
+            }
+        });
     </script>
 
 </body>
